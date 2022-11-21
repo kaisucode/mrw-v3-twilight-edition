@@ -33,6 +33,7 @@ if __name__ == "__main__":
     #  The queue module implements multi-producer, multi-consumer queues. 
     #  It is especially useful in threaded programming when information must be exchanged safely between multiple threads. 
     #  The Queue class in this module implements all the required locking semantics.
+    #  https://docs.python.org/3/library/queue.html#queue.Queue
 
     guestQueue = queue.Queue(maxsize=3)
     windowQueue = queue.Queue(maxsize=3)
@@ -54,6 +55,7 @@ if __name__ == "__main__":
             print("received image from ", rpi_name)
 
         frame += 1
+        #  img = np.concatenate((img, windowFrontImg), axis=1)
 
 
 
