@@ -4,6 +4,14 @@ import mediapipe as mp
 import queue
 import numpy as np
 
+def empty_frame(): 
+    img = np.zeros([520, 520, 3], np.uint8)
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    text = "Disconnected"
+    text_position = (30, 200)
+    img = cv2.putText(img, text, text_position, font, 2, (0, 255, 255), 5, cv2.LINE_AA)
+    return img
+
 def replace_background(fg, bg):
     bg_image = bg
     frame = fg
@@ -34,12 +42,7 @@ def safe_pop_from_queue(queue_name):
         cur_queue = windowBackQueue
 
     if cur_queue.empty(): 
-        img = np.zeros([520, 520, 3], np.uint8)
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        text = "Disconnected"
-        text_position = (30, 200)
-        img = cv2.putText(img, text, text_position, font, 2, (0, 255, 255), 5, cv2.LINE_AA)
-        return img
+        return empty_frame()
     
     return cur_queue.get_nowait()
 
@@ -71,22 +74,29 @@ if __name__ == "__main__":
 
 
     frame = 0
+    curGuestFrame = empty_frame()
+    curWindowFrame = empty_frame()
+    curWindowBackFrame = empty_frame()
+
     while True: 
         rpi_name, image = image_hub.recv_image()
         
         new_img = image
         if rpi_name == "guest": 
             guestQueue.put(image)
-            windowFrame, windowBackFrame = safe_pop_from_queue("window"), safe_pop_from_queue("windowBack")
+            curGuestFrame = safe_pop_from_queue("guest")
 
-            windowFrame = replace_background(image, windowFrame)
-            windowBackFrame = replace_background(image, windowBackFrame)
-            new_img = np.concatenate((windowFrame, windowBackFrame), axis=1)
-
+            rb_windowFrame = replace_background(curGuestFrame, curWindowFrame)
+            rb_windowBackFrame = replace_background(curGuestFrame, curWindowBackFrame)
+            new_img = np.concatenate((rb_windowFrame, rb_windowBackFrame), axis=1)
         elif rpi_name == "window": 
             windowQueue.put(image)
+            curWindowFrame = safe_pop_from_queue("window")
+            new_img = replace_background(curGuestFrame, curWindowFrame)
         elif rpi_name == "windowBack": 
             windowBackQueue.put(image)
+            curWindowBackFrame = safe_pop_from_queue("windowBack")
+            new_img = replace_background(curGuestFrame, curWindowBackFrame)
 
         new_img_str = encode_img(new_img)
         image_hub.send_reply(new_img_str)
