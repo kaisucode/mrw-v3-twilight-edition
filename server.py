@@ -2,6 +2,7 @@ import cv2
 import imagezmq
 import mediapipe as mp
 import queue
+import numpy as np
 
 def replace_background(fg, bg):
     bg_image = bg
@@ -47,15 +48,28 @@ if __name__ == "__main__":
     while True: 
         rpi_name, image = image_hub.recv_image()
 
-        cv2.imshow(rpi_name, image)
+        #  cv2.imshow(rpi_name, image)
+        #  cv2.waitKey(1)
+        #  image_hub.send_reply(b'OK')
+
+        new_img = np.concatenate((image, image), axis=1)
+
+        new_img_str = cv2.imencode('.jpg', new_img)[1].tostring()
+        nparr = np.fromstring(new_img_str, np.uint8)
+        con_img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        #  cv2.imshow("what", con_img)
+
+        cv2.imshow(rpi_name, con_img)
         cv2.waitKey(1)
         image_hub.send_reply(b'OK')
+
+        #  image_hub.send_reply(b'OK')
+        #  image_hub.send_reply(new_img_str)
         
         if (frame % 10 == 0): 
             print("received image from ", rpi_name)
 
         frame += 1
-        #  img = np.concatenate((img, windowFrontImg), axis=1)
 
 
 
