@@ -43,6 +43,10 @@ def safe_pop_from_queue(queue_name):
 
     if cur_queue.empty(): 
         return empty_frame()
+
+    while cur_queue.qsize() > 1: 
+        cur_queue.get_nowait()
+    print(queue_name, ": ", cur_queue.qsize())
     
     return cur_queue.get_nowait()
 
@@ -86,16 +90,26 @@ if __name__ == "__main__":
             guestQueue.put(image)
             curGuestFrame = safe_pop_from_queue("guest")
 
+            #  guestQueue.get_nowait()
+            #  guestQueue.get_nowait()
+            #  guestQueue.clear()
+
             rb_windowFrame = replace_background(curGuestFrame, curWindowFrame)
             rb_windowBackFrame = replace_background(curGuestFrame, curWindowBackFrame)
             new_img = np.concatenate((rb_windowFrame, rb_windowBackFrame), axis=1)
         elif rpi_name == "window": 
             windowQueue.put(image)
             curWindowFrame = safe_pop_from_queue("window")
+            #  windowQueue.clear()
+            #  windowQueue.get_nowait()
+            #  windowQueue.get_nowait()
             new_img = replace_background(curGuestFrame, curWindowFrame)
         elif rpi_name == "windowBack": 
             windowBackQueue.put(image)
             curWindowBackFrame = safe_pop_from_queue("windowBack")
+            #  windowBackQueue.clear()
+            #  windowBackQueue.get_nowait()
+            #  windowBackQueue.get_nowait()
             new_img = replace_background(curGuestFrame, curWindowBackFrame)
 
         new_img_str = encode_img(new_img)

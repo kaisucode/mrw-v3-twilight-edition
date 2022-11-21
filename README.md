@@ -32,6 +32,7 @@ look [here](https://docs.python.org/3/library/queue.html#queue.Queue.join) for e
 
 
 ### TODOs
+- [ ] Intnetially hamstrining the resolution
 - [ ] try using worker threads for mediapipe processing?
 - [ ] [audio clip support](https://github.com/jeffbass/imagezmq/issues/66). NOTE: THIS IS NOT AUDIO STREAMING
 
