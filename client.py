@@ -12,9 +12,12 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--device", help="window, guest, or windowBack")
 parser.add_argument("--webcam", help="webcam device number", default=0)
+parser.add_argument("--ip", help="server ip address", default="localhost")
 args = parser.parse_args()
 
-sender = imagezmq.ImageSender(connect_to='tcp://localhost:5555')
+url = "tcp://" + args.ip + ":5555"
+#  sender = imagezmq.ImageSender(connect_to='tcp://localhost:5555')
+sender = imagezmq.ImageSender(connect_to=url)
 print("Connected to server")
 
 rpi_name = socket.gethostname() # send RPi hostname with each image

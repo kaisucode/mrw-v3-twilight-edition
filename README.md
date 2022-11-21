@@ -14,7 +14,7 @@
 
 ### Run on client
 
-- `python client.py --device="guest"`
+- `python client.py --device="guest" --ip="10.38.10.219"`
 - `python client.py --device="window"`
 - `python client.py --device="windowBack"`
 
