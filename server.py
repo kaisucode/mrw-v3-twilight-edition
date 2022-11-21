@@ -24,6 +24,29 @@ def replace_background(fg, bg):
     output_image = np.where(condition, frame, bg_image)
     return output_image
 
+def safe_pop_from_queue(queue_name): 
+    cur_queue = None
+    if queue_name == "guest": 
+        cur_queue = guestQueue
+    elif queue_name == "window": 
+        cur_queue = windowQueue
+    elif queue_name == "windowBack": 
+        cur_queue = windowBackQueue
+
+    if cur_queue.empty(): 
+        img = np.zeros([520, 520, 3], np.uint8)
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        text = "Disconnected"
+        text_position = (30, 200)
+        img = cv2.putText(img, text, text_position, font, 2, (0, 255, 255), 5, cv2.LINE_AA)
+        return img
+    
+    return cur_queue.get_nowait()
+
+
+
+def encode_img(img): 
+    return cv2.imencode('.jpg', new_img)[1].tostring()
 
 if __name__ == "__main__":
 
@@ -36,9 +59,12 @@ if __name__ == "__main__":
     #  The Queue class in this module implements all the required locking semantics.
     #  https://docs.python.org/3/library/queue.html#queue.Queue
 
-    guestQueue = queue.Queue(maxsize=3)
-    windowQueue = queue.Queue(maxsize=3)
-    windowBackQueue = queue.Queue(maxsize=3)
+    #  guestQueue = queue.Queue(maxsize=3)
+    #  windowQueue = queue.Queue(maxsize=3)
+    #  windowBackQueue = queue.Queue(maxsize=3)
+    guestQueue = queue.Queue()
+    windowQueue = queue.Queue()
+    windowBackQueue = queue.Queue()
 
     mp_selfie_segmentation = mp.solutions.selfie_segmentation
     selfie_segmentation = mp_selfie_segmentation.SelfieSegmentation()
@@ -47,22 +73,22 @@ if __name__ == "__main__":
     frame = 0
     while True: 
         rpi_name, image = image_hub.recv_image()
+        
+        new_img = image
+        if rpi_name == "guest": 
+            guestQueue.put(image)
+            windowFrame, windowBackFrame = safe_pop_from_queue("window"), safe_pop_from_queue("windowBack")
 
-        #  cv2.imshow(rpi_name, image)
-        #  cv2.waitKey(1)
-        #  image_hub.send_reply(b'OK')
+            windowFrame = replace_background(image, windowFrame)
+            windowBackFrame = replace_background(image, windowBackFrame)
+            new_img = np.concatenate((windowFrame, windowBackFrame), axis=1)
 
-        new_img = np.concatenate((image, image), axis=1)
+        elif rpi_name == "window": 
+            windowQueue.put(image)
+        elif rpi_name == "windowBack": 
+            windowBackQueue.put(image)
 
-        new_img_str = cv2.imencode('.jpg', new_img)[1].tostring()
-        #  nparr = np.fromstring(new_img_str, np.uint8)
-        #  con_img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-        #  cv2.imshow(rpi_name, con_img)
-        #  cv2.waitKey(1)
-        #  image_hub.send_reply(b'OK')
-
-        #  image_hub.send_reply(b'OK')
+        new_img_str = encode_img(new_img)
         image_hub.send_reply(new_img_str)
         
         if (frame % 10 == 0): 

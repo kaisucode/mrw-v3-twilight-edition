@@ -14,18 +14,11 @@ picam = VideoStream().start()
 time.sleep(2.0)  # allow camera sensor to warm up
 while True:  # send images as stream until Ctrl-C
     image = picam.read()
-    new_img_str = sender.send_image(rpi_name, image)
+    new_img_str = sender.send_image("guest", image)
 
     nparr = np.fromstring(new_img_str, np.uint8)
     rec_img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
     cv2.imshow(rpi_name, rec_img)
     cv2.waitKey(1)
-    #  image_hub.send_reply(b'OK')
-
-    #  nparr = np.fromstring(reply, np.uint8)
-    #  new_img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    #  cv2.imshow(rpi_name, new_img)
-
-    #  print("reply from server: ", reply)
 
