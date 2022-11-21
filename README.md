@@ -3,17 +3,26 @@
 
 
 ### Install Dependencies
+
 - `pip install -r requirements.txt`
 
 
 ### Run on server
+
 - `python server.py`
 
 
 ### Run on client
+
 - `python client.py --device="guest"`
 - `python client.py --device="window"`
 - `python client.py --device="windowBack"`
+
+### For using different webcams on the same device
+
+- `python client.py --device="window" --webcam=0`
+- `python client.py --device="windowBack" --webcam=1`
+
 
 
 
