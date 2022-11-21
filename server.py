@@ -55,16 +55,15 @@ if __name__ == "__main__":
         new_img = np.concatenate((image, image), axis=1)
 
         new_img_str = cv2.imencode('.jpg', new_img)[1].tostring()
-        nparr = np.fromstring(new_img_str, np.uint8)
-        con_img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        #  cv2.imshow("what", con_img)
+        #  nparr = np.fromstring(new_img_str, np.uint8)
+        #  con_img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-        cv2.imshow(rpi_name, con_img)
-        cv2.waitKey(1)
-        image_hub.send_reply(b'OK')
+        #  cv2.imshow(rpi_name, con_img)
+        #  cv2.waitKey(1)
+        #  image_hub.send_reply(b'OK')
 
         #  image_hub.send_reply(b'OK')
-        #  image_hub.send_reply(new_img_str)
+        image_hub.send_reply(new_img_str)
         
         if (frame % 10 == 0): 
             print("received image from ", rpi_name)
